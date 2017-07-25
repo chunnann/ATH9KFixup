@@ -144,7 +144,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                     const uint8_t find4[]    = {0xC1, 0xE8, 0x0C, 0x25, 0xC0, 0xFF, 0x0F, 0x00};
                     const uint8_t replace4[] = {0xC1, 0xE8, 0x0C, 0xB8, 0xC0, 0x01, 0x00, 0x00};
                     KextPatch kext_patch4 {
-                        {&kextList[i], find4, replace4, sizeof(find4), 4},
+                        {&kextList[i], find4, replace4, sizeof(find4), 2},
                         KernelVersion::Mavericks, KernelVersion::Mavericks
                     };
                     applyPatches(patcher, index, &kext_patch4, 1);
@@ -154,7 +154,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                     const uint8_t find5[]    = {0xC1, 0xE9, 0x08, 0x83, 0xE1, 0x0F};
                     const uint8_t replace5[] = {0x90, 0xB9, 0x02, 0x00, 0x00, 0x00};
                     KextPatch kext_patch5 {
-                        {&kextList[i], find5, replace5, sizeof(find5), 2},
+                        {&kextList[i], find5, replace5, sizeof(find5), 5},
                         KernelVersion::Mavericks, KernelVersion::Sierra
                     };
                     applyPatches(patcher, index, &kext_patch5, 1);
@@ -217,7 +217,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                             const uint8_t find10[]    = {0xFF, 0x03, 0x00, 0x00, 0x4C, 0x89, 0xFF, 0x4C, 0x89, 0xF6, 0x89, 0xDA, 0xB9, 0xFF, 0x03, 0x00, 0x00};
                             const uint8_t replace10[] = {0xFF, 0x01, 0x00, 0x00, 0x4C, 0x89, 0xFF, 0x4C, 0x89, 0xF6, 0x89, 0xDA, 0xB9, 0xFF, 0x01, 0x00, 0x00};
                             KextPatch kext_patch10 {
-                                {&kextList[i], find10, replace10, sizeof(find10), 1},
+                                {&kextList[i], find10, replace10, sizeof(find10), 2},
                                 KernelVersion::Mavericks, KernelVersion::Mavericks
                             };
                             applyPatches(patcher, index, &kext_patch10, 1);
@@ -228,7 +228,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                             const uint8_t find10[]    = {0xFF, 0x03, 0x00, 0x00, 0xB9, 0xFF, 0x03, 0x00, 0x00};
                             const uint8_t replace10[] = {0xFF, 0x01, 0x00, 0x00, 0xB9, 0xFF, 0x01, 0x00, 0x00};
                             KextPatch kext_patch10 {
-                                {&kextList[i], find10, replace10, sizeof(find10), 1},
+                                {&kextList[i], find10, replace10, sizeof(find10), 2},
                                 KernelVersion::Yosemite, KernelVersion::Sierra
                             };
                             applyPatches(patcher, index, &kext_patch10, 1);
