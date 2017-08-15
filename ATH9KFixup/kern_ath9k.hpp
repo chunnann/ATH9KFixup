@@ -57,4 +57,4 @@ private:
     int progressState {ProcessingState::NothingReady};
 };
 
-#endif /* kern_ath9k */
+#endif /* kern_ath9k_hpp */

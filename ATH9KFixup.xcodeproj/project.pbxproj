@@ -10,6 +10,10 @@
 		1C748C2D1C21952C0024EED2 /* kern_start.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C748C2C1C21952C0024EED2 /* kern_start.cpp */; };
 		1C9CB7B01C789FF500231E41 /* kern_ath9k.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C9CB7AE1C789FF500231E41 /* kern_ath9k.cpp */; };
 		1C9CB7B11C789FF500231E41 /* kern_ath9k.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 1C9CB7AF1C789FF500231E41 /* kern_ath9k.hpp */; };
+		A7005ED81F4362D2009B5FE0 /* kern_ath9300.h in Headers */ = {isa = PBXBuildFile; fileRef = A7005ED71F4362D2009B5FE0 /* kern_ath9300.h */; };
+		A7005EDA1F4362E0009B5FE0 /* kern_ath946x.h in Headers */ = {isa = PBXBuildFile; fileRef = A7005ED91F4362E0009B5FE0 /* kern_ath946x.h */; };
+		A7005EDC1F4362F0009B5FE0 /* kern_ath9485.h in Headers */ = {isa = PBXBuildFile; fileRef = A7005EDB1F4362F0009B5FE0 /* kern_ath9485.h */; };
+		A7005EDE1F4362FC009B5FE0 /* kern_ath9565.h in Headers */ = {isa = PBXBuildFile; fileRef = A7005EDD1F4362FC009B5FE0 /* kern_ath9565.h */; };
 		CE405EC91E49DD9700AA0B3D /* libkmod.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CE405EC71E49DD7100AA0B3D /* libkmod.a */; };
 		CE405ED91E4A080700AA0B3D /* plugin_start.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CE405ED81E4A080700AA0B3D /* plugin_start.cpp */; };
 /* End PBXBuildFile section */
@@ -35,6 +39,10 @@
 		1CF01C901C8CF97F002DCEA3 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		1CF01C921C8CF997002DCEA3 /* Changelog.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Changelog.md; sourceTree = "<group>"; };
 		1CF01C931C8DF02E002DCEA3 /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		A7005ED71F4362D2009B5FE0 /* kern_ath9300.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kern_ath9300.h; sourceTree = "<group>"; };
+		A7005ED91F4362E0009B5FE0 /* kern_ath946x.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kern_ath946x.h; sourceTree = "<group>"; };
+		A7005EDB1F4362F0009B5FE0 /* kern_ath9485.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kern_ath9485.h; sourceTree = "<group>"; };
+		A7005EDD1F4362FC009B5FE0 /* kern_ath9565.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kern_ath9565.h; sourceTree = "<group>"; };
 		CE405EBA1E49DD7100AA0B3D /* kern_compression.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_compression.hpp; sourceTree = "<group>"; };
 		CE405EBB1E49DD7100AA0B3D /* kern_disasm.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_disasm.hpp; sourceTree = "<group>"; };
 		CE405EBC1E49DD7100AA0B3D /* kern_file.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kern_file.hpp; sourceTree = "<group>"; };
@@ -88,9 +96,12 @@
 				1C748C2C1C21952C0024EED2 /* kern_start.cpp */,
 				1C9CB7AE1C789FF500231E41 /* kern_ath9k.cpp */,
 				1C9CB7AF1C789FF500231E41 /* kern_ath9k.hpp */,
+				A7005ED71F4362D2009B5FE0 /* kern_ath9300.h */,
+				A7005ED91F4362E0009B5FE0 /* kern_ath946x.h */,
+				A7005EDB1F4362F0009B5FE0 /* kern_ath9485.h */,
+				A7005EDD1F4362FC009B5FE0 /* kern_ath9565.h */,
 				1C748C2E1C21952C0024EED2 /* Info.plist */,
 			);
-			name = ATH9KFixup;
 			path = ATH9KFixup;
 			sourceTree = "<group>";
 		};
@@ -151,6 +162,10 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A7005ED81F4362D2009B5FE0 /* kern_ath9300.h in Headers */,
+				A7005EDA1F4362E0009B5FE0 /* kern_ath946x.h in Headers */,
+				A7005EDE1F4362FC009B5FE0 /* kern_ath9565.h in Headers */,
+				A7005EDC1F4362F0009B5FE0 /* kern_ath9485.h in Headers */,
 				1C9CB7B11C789FF500231E41 /* kern_ath9k.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -329,7 +344,7 @@
 				MODULE_NAME = com.chunnann.ATH9KFixup;
 				MODULE_START = "$(PRODUCT_NAME)_kern_start";
 				MODULE_STOP = "$(PRODUCT_NAME)_kern_stop";
-				MODULE_VERSION = 1.0.0;
+				MODULE_VERSION = 1.0.1;
 				OTHER_CFLAGS = (
 					"-mmmx",
 					"-msse",
@@ -373,7 +388,7 @@
 				MODULE_NAME = com.chunnann.ATH9KFixup;
 				MODULE_START = "$(PRODUCT_NAME)_kern_start";
 				MODULE_STOP = "$(PRODUCT_NAME)_kern_stop";
-				MODULE_VERSION = 1.0.0;
+				MODULE_VERSION = 1.0.1;
 				OTHER_CFLAGS = (
 					"-mmmx",
 					"-msse",
