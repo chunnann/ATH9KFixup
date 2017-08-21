@@ -150,6 +150,11 @@ public:
 	EXPORT void setupKextListening();
 	
 	/**
+	 *  Activates monitoring functions if necessary
+	 */
+	void activate();
+	
+	/**
 	 *  Load handling structure
 	 */
 	class KextHandler {
@@ -219,6 +224,19 @@ public:
 	 *  @return wrapper pointer or 0 on success
 	 */
 	EXPORT mach_vm_address_t routeFunction(mach_vm_address_t from, mach_vm_address_t to, bool buildWrapper=false, bool kernelRoute=true);
+	
+	/**
+	 *  Route block at assembly level
+	 *
+	 *  @param from         address to route
+	 *  @param opcodes      opcodes to insert
+	 *  @param opnum        number of opcodes
+	 *  @param buildWrapper create entrance wrapper
+	 *  @param kernelRoute  kernel change requiring memory protection changes and patch reverting at unload
+	 *
+	 *  @return wrapper pointer or 0 on success
+	 */
+	EXPORT mach_vm_address_t routeBlock(mach_vm_address_t from, const uint8_t *opcodes, size_t opnum, bool buildWrapper=false, bool kernelRoute=true);
 
 private:
 
@@ -238,14 +256,21 @@ private:
 	off_t tempExecutableMemoryOff {0};
 	
 	/**
+	 *  Patcher status
+	 */
+	bool activated {false};
+	
+	/**
 	 *  Created routed trampoline page
 	 *
-	 *  @param func original area
-	 *  @param min  minimal amount of bytes that will be overwritten
+	 *  @param func     original area
+	 *  @param min      minimal amount of bytes that will be overwritten
+	 *  @param opcodes  opcodes to insert before function
+	 *  @param opnum    number of opcodes
 	 *
 	 *  @return trampoline pointer or 0
 	 */
-	mach_vm_address_t createTrampoline(mach_vm_address_t func, size_t min);
+	mach_vm_address_t createTrampoline(mach_vm_address_t func, size_t min, const uint8_t *opcodes=nullptr, size_t opnum=0);
 
 #ifdef KEXTPATCH_SUPPORT
 	/**

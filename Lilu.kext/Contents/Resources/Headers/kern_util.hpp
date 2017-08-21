@@ -31,10 +31,10 @@ extern const int version_minor;
 #define SYSLOG(str, ...) IOLog( xStringify(PRODUCT_NAME) ": " str "\n", ## __VA_ARGS__)
 
 #ifdef DEBUG
-#define DBGLOG(str, ...)																\
-	do {																				\
-		if (ADDPR(debugEnabled))										\
-			IOLog( xStringify(PRODUCT_NAME) ": (DEBUG) " str "\n", ## __VA_ARGS__);		\
+#define DBGLOG(str, ...)													\
+	do {																	\
+		if (ADDPR(debugEnabled))											\
+			SYSLOG( "(DEBUG) " str, ## __VA_ARGS__);						\
 	} while(0)
 #else
 #define DBGLOG(str, ...) do { } while(0)
@@ -64,12 +64,25 @@ EXPORT const char *strstr(const char *stack, const char *needle, size_t len=0);
 EXPORT char *strrchr(const char *stack, int ch);
 
 /**
+ *  Count array elements
+ *
+ *  @param array   Array to process
+ *
+ *  @return number of elements
+ */
+template <class T, size_t N>
+constexpr size_t arrsize(const T (&array)[N]) {
+	return N;
+}
+
+/**
  *  C-style memory management from libkern, missing from headers
  */
 extern "C" {
 	void *kern_os_malloc(size_t size);
 	void *kern_os_calloc(size_t num, size_t size);
 	void kern_os_free(void *addr);
+	void kern_os_cfree(void *addr);
 	void *kern_os_realloc(void *addr, size_t nsize);
 }
 
