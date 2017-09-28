@@ -11,6 +11,7 @@
 #include <Headers/kern_config.hpp>
 
 #include <libkern/libkern.h>
+#include <mach/vm_types.h>
 #include <mach/vm_prot.h>
 #include <IOKit/IOLib.h>
 
@@ -27,6 +28,8 @@ extern bool ADDPR(debugEnabled);
 extern const int version_major;
 // Kernel version minor
 extern const int version_minor;
+// Kernel map
+extern vm_map_t kernel_map;
 
 #define SYSLOG(str, ...) IOLog( xStringify(PRODUCT_NAME) ": " str "\n", ## __VA_ARGS__)
 
@@ -252,13 +255,24 @@ public:
 	}
 	
 	/**
-	 *  Return evector element
+	 *  Return evector element reference
 	 *
 	 *  @param index array index
 	 *
 	 *  @return the element at provided index
 	 */
 	T &operator [](size_t index) {
+		return ptr[index];
+	}
+	
+	/**
+	 *  Return evector const element reference
+	 *
+	 *  @param index array index
+	 *
+	 *  @return the element at provided index
+	 */
+	const T &operator [](size_t index) const {
 		return ptr[index];
 	}
 	
@@ -280,7 +294,7 @@ public:
 			kern_os_free(ptr);
 			ptr = nullptr;
 		} else {
-			T *nPtr = static_cast<T *>(kern_os_realloc(ptr, (cnt)*sizeof(T *)));
+			T *nPtr = static_cast<T *>(kern_os_realloc(ptr, (cnt)*sizeof(T)));
 			if (nPtr) {
 				ptr = nPtr;
 			} else {
@@ -299,7 +313,7 @@ public:
 	 *  @return true on success
 	 */
 	bool push_back(T &element) {
-		T *nPtr = static_cast<T *>(kern_os_realloc(ptr, (cnt+1)*sizeof(T *)));
+		T *nPtr = static_cast<T *>(kern_os_realloc(ptr, (cnt+1)*sizeof(T)));
 		if (nPtr) {
 			ptr = nPtr;
 			ptr[cnt] = element;
@@ -319,7 +333,7 @@ public:
 	 *  @return true on success
 	 */
 	bool push_back(T &&element) {
-		T *nPtr = static_cast<T *>(kern_os_realloc(ptr, (cnt+1)*sizeof(T *)));
+		T *nPtr = static_cast<T *>(kern_os_realloc(ptr, (cnt+1)*sizeof(T)));
 		if (nPtr) {
 			ptr = nPtr;
 			ptr[cnt] = element;
