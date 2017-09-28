@@ -95,7 +95,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         progressState |= ProcessingState::AirPortAtheros40Patched;
                         DBGLOG("ath9k @ patched 10.12.x start");
                     }
-                    
+
                     if (getKernelVersion() == KernelVersion::Mavericks){
                         const uint8_t find2[]    = {0x66, 0x83, 0xFA, 0x30};
                         const uint8_t replace2[] = {0x66, 0x83, 0xFA, 0x00};
@@ -170,17 +170,17 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                     progressState |= ProcessingState::AirPortAtheros40Patched;
                     DBGLOG("ath9k @ patched _ar9300ReadRevisions #3");
                     
-                    const uint8_t find7[]    = {0x66, 0x89, 0x83, 0x16, 0x09, 0x00, 0x00};
-                    const uint8_t replace7[] = {0xC6, 0x83, 0x16, 0x09, 0x00, 0x00, 0x00};
+                    const uint8_t find7[]    = {0x0F, 0xB6, 0x87, 0x00, 0xB2, 0x00, 0x00, 0x83, 0xE0, 0x0F};
+                    const uint8_t replace7[] = {0x0F, 0xB6, 0x87, 0x00, 0xB2, 0x00, 0x00, 0x90, 0x31, 0xC0};
                     KextPatch kext_patch7 {
-                        {&kextList[i], find7, replace7, sizeof(find7), 4},
+                        {&kextList[i], find7, replace7, sizeof(find7), 1},
                         KernelVersion::Mavericks, KernelVersion::Sierra
                     };
                     applyPatches(patcher, index, &kext_patch7, 1);
                     progressState |= ProcessingState::AirPortAtheros40Patched;
-                    DBGLOG("ath9k @ patched _ar9300FillCapabilityInfo");
+                    DBGLOG("ath9k @ patched _ar9300RxGainIndexGet");
                     
-                    const uint8_t find8[]    = {0x0F, 0xB6, 0x87, 0x00, 0xB2, 0x00, 0x00, 0x83, 0xE0, 0x0F};
+                    const uint8_t find8[]    = {0x0F, 0xB6, 0x87, 0x00, 0xB2, 0x00, 0x00, 0xC1, 0xE8, 0x04};
                     const uint8_t replace8[] = {0x0F, 0xB6, 0x87, 0x00, 0xB2, 0x00, 0x00, 0x90, 0x31, 0xC0};
                     KextPatch kext_patch8 {
                         {&kextList[i], find8, replace8, sizeof(find8), 1},
@@ -188,18 +188,28 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                     };
                     applyPatches(patcher, index, &kext_patch8, 1);
                     progressState |= ProcessingState::AirPortAtheros40Patched;
-                    DBGLOG("ath9k @ patched _ar9300RxGainIndexGet");
+                    DBGLOG("ath9k @ patched _ar9300TxGainIndexGet");
                     
-                    const uint8_t find9[]    = {0x0F, 0xB6, 0x87, 0x00, 0xB2, 0x00, 0x00, 0xC1, 0xE8, 0x04};
-                    const uint8_t replace9[] = {0x0F, 0xB6, 0x87, 0x00, 0xB2, 0x00, 0x00, 0x90, 0x31, 0xC0};
+                    const uint8_t find9[]    = {0x66, 0x89, 0x83, 0x16, 0x09, 0x00, 0x00};
+                    const uint8_t replace9[] = {0xC6, 0x83, 0x16, 0x09, 0x00, 0x00, 0x00};
                     KextPatch kext_patch9 {
-                        {&kextList[i], find9, replace9, sizeof(find9), 1},
+                        {&kextList[i], find9, replace9, sizeof(find9), 4},
                         KernelVersion::Mavericks, KernelVersion::Sierra
                     };
                     applyPatches(patcher, index, &kext_patch9, 1);
                     progressState |= ProcessingState::AirPortAtheros40Patched;
-                    DBGLOG("ath9k @ patched _ar9300TxGainIndexGet");
+                    DBGLOG("ath9k @ patched _ar9300FillCapabilityInfo");
  
+                    const uint8_t find19[]    = {0x48, 0xB9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x60, 0x10, 0x00};
+                    const uint8_t replace19[] = {0x48, 0xB9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x10, 0x00};
+                    KextPatch kext_patch19 {
+                        {&kextList[i], find19, replace19, sizeof(find19), 1},
+                        KernelVersion::Mavericks, KernelVersion::Sierra
+                    };
+                    applyPatches(patcher, index, &kext_patch19, 1);
+                    progressState |= ProcessingState::AirPortAtheros40Patched;
+                    DBGLOG("ath9k @ patched _ar9300FillCapabilityInfo #2");
+
                     char tmp[16];
                     if (PE_parse_boot_argn("-ath9485", tmp, sizeof(tmp))) {
                         const uint8_t find[]    = {0x39, 0x33, 0x38, 0x30};
@@ -234,7 +244,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                             progressState |= ProcessingState::AirPortAtheros40Patched;
                             DBGLOG("ath9k @ patched _ar9300EepromRestoreInternal");
                         }
-                        
+
                         const uint8_t find11[]    = {0x8D, 0x90, 0x00, 0x04, 0x00, 0x00};
                         const uint8_t replace11[] = {0x8D, 0x90, 0x00, 0x14, 0x00, 0x00};
                         KextPatch kext_patch11 {
@@ -244,7 +254,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         applyPatches(patcher, index, &kext_patch11, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
                         DBGLOG("ath9k @ patched _ar9300SetRxFilter");
-                        
+ 
                         const uint8_t find12[]    = {0xA2, 0x00, 0x00, 0xBA, 0x07, 0x00, 0x00, 0x00};
                         const uint8_t replace12[] = {0xA2, 0x00, 0x00, 0xBA, 0x01, 0x00, 0x00, 0x00};
                         KextPatch kext_patch12 {
