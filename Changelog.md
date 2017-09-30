@@ -1,6 +1,9 @@
 ATH9KFixup Changelog
 ====================
 
+#### v1.0.5
+- Cosmetic changes
+
 #### v1.0.4
 - Lilu.kext updated to 1.1.7
 
