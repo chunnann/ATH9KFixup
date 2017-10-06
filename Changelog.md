@@ -1,6 +1,9 @@
 ATH9KFixup Changelog
 ====================
 
+#### v1.1.0
+- Added High Sierra compatibility
+
 #### v1.0.5
 - Cosmetic changes
 
