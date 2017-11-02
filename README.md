@@ -20,3 +20,4 @@ Boot args:
 - [Pike R. Alpha](https://github.com/Piker-Alpha) for patch
 - [lvs1974](https://applelife.ru/members/lvs1974.53809/) for original source code and idea
 - [chunnann](http://www.insanelymac.com/forum/user/1977171-chunnann/) for writing the software and maintaining it
+- [black.dragon74] (http://forum.osxlatitude.com/index.php?/user/86692-blackdragon74/) For adding support for Lilu 1.2.0

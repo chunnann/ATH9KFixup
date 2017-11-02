@@ -18,14 +18,17 @@
 #include <sys/vnode.h>
 #include <mach-o/loader.h>
 #include <mach/vm_param.h>
+#include <libkern/c++/OSDictionary.h>
 
 class MachInfo {
 	mach_vm_address_t running_text_addr {0}; // the address of running __TEXT segment
 	mach_vm_address_t disk_text_addr {0};    // the same address at from a file
 	mach_vm_address_t kaslr_slide {0};       // the kernel aslr slide, computed as the difference between above's addresses
-#ifdef LILU_COMPRESSION_SUPPORT
-	uint8_t *file_buf {nullptr};             // read file data if decompression was used
-#endif /* LILU_COMPRESSION_SUPPORT */
+	uint8_t *file_buf {nullptr};             // read file data
+	OSDictionary *prelink_dict {nullptr};    // read prealinked kext dictionary
+	uint8_t *prelink_addr {nullptr};         // prelink text base address
+	mach_vm_address_t prelink_vmaddr {0};    // prelink text base vm address (for kexts this is their actual slide)
+	uint32_t file_buf_size {0};              // read file data size
 	uint8_t *linkedit_buf {nullptr};         // pointer to __LINKEDIT buffer containing symbols to solve
 	uint64_t linkedit_fileoff {0};           // __LINKEDIT file offset so we can read
 	uint64_t linkedit_size {0};
@@ -37,7 +40,8 @@ class MachInfo {
 	size_t memory_size {HeaderSize};         // memory size
 	bool kaslr_slide_set {false};            // kaslr can be null, used for disambiguation
 	bool allow_decompress {true};            // allows mach decompression
-	
+	bool prelink_slid {false};               // assume kaslr-slid kext addresses
+
 	/**
 	 *  16 byte IDT descriptor, used for 32 and 64 bits kernels (64 bit capable cpus!)
 	 */
@@ -52,21 +56,21 @@ class MachInfo {
 	};
 	
 	/**
-	 *  retrieve the address of the IDT
+	 *  Retrieve the address of the IDT
 	 *
 	 *  @return always returns the IDT address
 	 */
 	mach_vm_address_t getIDTAddress();
 	
 	/**
-	 *  calculate the address of the kernel int80 handler
+	 *  Calculate the address of the kernel int80 handler
 	 *
 	 *  @return always returns the int80 handler address
 	 */
 	mach_vm_address_t calculateInt80Address();
 	
 	/**
-	 *  retrieve LC_UUID command value from a mach header
+	 *  Retrieve LC_UUID command value from a mach header
 	 *
 	 *  @param header mach header pointer
 	 *
@@ -75,7 +79,7 @@ class MachInfo {
 	uint64_t *getUUID(void *header);
 	
 	/**
-	 *  enable/disable the Write Protection bit in CR0 register
+	 *  Enable/disable the Write Protection bit in CR0 register
 	 *
 	 *  @param enable the desired value
 	 *
@@ -84,8 +88,8 @@ class MachInfo {
 	static kern_return_t setWPBit(bool enable);
 	
 	/**
-	 *  retrieve the first pages of a binary at disk into a buffer
-	 *  version that uses KPI VFS functions and a ripped uio_createwithbuffer() from XNU
+	 *  Retrieve the first pages of a binary at disk into a buffer
+	 *  Version that uses KPI VFS functions and a ripped uio_createwithbuffer() from XNU
 	 *
 	 *  @param buffer     allocated buffer sized no less than HeaderSize
 	 *  @param vnode      file node
@@ -98,7 +102,7 @@ class MachInfo {
 	kern_return_t readMachHeader(uint8_t *buffer, vnode_t vnode, vfs_context_t ctxt, off_t off=0);
 
 	/**
-	 *  retrieve the whole linkedit segment into target buffer from kernel binary at disk
+	 *  Retrieve the whole linkedit segment into target buffer from kernel binary at disk
 	 *
 	 *  @param vnode file node
 	 *  @param ctxt  filesystem context
@@ -108,14 +112,31 @@ class MachInfo {
 	kern_return_t readLinkedit(vnode_t vnode, vfs_context_t ctxt);
 	
 	/**
-	 *  retrieve necessary mach-o header information from the mach header
+	 *  Retrieve necessary mach-o header information from the mach header
 	 *
 	 *  @param header read header sized no less than HeaderSize
 	 */
 	void processMachHeader(void *header);
+
+	/**
+	 *  Load kext info dictionary and addresses if they were not loaded previously
+	 */
+	void updatePrelinkInfo();
+
+	/**
+	 *  Lookup mach image in prelinked image
+	 *
+	 *  @param identifier  identifier
+	 *  @param imageSize   size of the returned buffer
+	 *  @param slide       actual slide for symbols (normally kaslr or 0)
+	 *  @param missing     set to true on successful prelink parsing when image is not needed
+	 *
+	 *  @return pointer to const buffer on success or nullptr
+	 */
+	uint8_t *findImage(const char *identifier, uint32_t &imageSize, mach_vm_address_t &slide, bool &missing);
 	
 	MachInfo(bool asKernel, const char *id) : isKernel(asKernel), objectId(id) {
-		DBGLOG("mach @ MachInfo asKernel %d object constructed", asKernel);
+		DBGLOG("mach", "MachInfo asKernel %d object constructed", asKernel);
 	}
 	MachInfo(const MachInfo &) = delete;
 	MachInfo &operator =(const MachInfo &) = delete;
@@ -135,12 +156,13 @@ public:
 	/**
 	 *  Specified file identifier
 	 */
-	const char *objectId {nullptr};
+	EXPORT const char *objectId {nullptr};
 
 	/**
 	 *  MachInfo object generator
 	 *
 	 *  @param asKernel this MachInfo represents a kernel
+	 *  @param id       kinfo identifier (e.g. CFBundleIdentifier)
 	 *
 	 *  @return MachInfo object or nullptr
 	 */
@@ -150,12 +172,14 @@ public:
 	/**
 	 *  Resolve mach data in the kernel
 	 *
-	 *  @param paths  filesystem paths for lookup
-	 *  @param num    the number of paths passed
+	 *  @param paths      filesystem paths for lookup
+	 *  @param num        the number of paths passed
+	 *  @param prelink    prelink information source (i.e. Kernel MachInfo)
+	 *  @param fsfallback fallback to reading from filesystem if prelink failed
 	 *
 	 *  @return KERN_SUCCESS if loaded
 	 */
-	EXPORT kern_return_t init(const char * const paths[], size_t num = 1);
+	EXPORT kern_return_t init(const char * const paths[], size_t num = 1, MachInfo *prelink=nullptr, bool fsfallback=false);
 	
 	/**
 	 *  Release the allocated memory, must be called regardless of the init error
@@ -221,12 +245,12 @@ public:
 	/**
 	 *  enable/disable kernel memory write protection
 	 *
-	 *  @param enable the desired value
-	 *  @param sync   for synchronous execution, calls in the middle will be ignored
+	 *  @param enable  the desired value
+	 *  @param lock    use spinlock to disable cpu preemption (see KernelPatcher::kernelWriteLock)
 	 *
 	 *  @return KERN_SUCCESS if succeeded
 	 */
-	EXPORT static kern_return_t setKernelWriting(bool enable, bool sync=false);
+	EXPORT static kern_return_t setKernelWriting(bool enable, IOSimpleLock *lock);
 	
 	/**
 	 *  Compare the loaded kernel with the passed kernel header
@@ -250,6 +274,11 @@ public:
 	 *  @param cpu         cpu to look for in case of fat binaries
 	 */
 	EXPORT static void findSectionBounds(void *ptr, vm_address_t &vmsegment, vm_address_t &vmsection, void *&sectionptr, size_t &size, const char *segmentName="__TEXT", const char *sectionName="__text", cpu_type_t cpu=CPU_TYPE_X86_64);
+
+	/**
+	 *  Request to free file buffer resources (not including linkedit symtable)
+	 */
+	void freeFileBufferResources();
 };
 
 #endif /* kern_mach_hpp */
