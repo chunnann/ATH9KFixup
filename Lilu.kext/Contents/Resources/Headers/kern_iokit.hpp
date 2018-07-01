@@ -34,7 +34,7 @@ namespace WIOKit {
 	 *  @return true on success
 	 */
 	template <typename T>
-	bool getOSDataValue(const OSObject *obj, const char *name, T &value) {
+	inline bool getOSDataValue(const OSObject *obj, const char *name, T &value) {
 		if (obj) {
 			auto data = OSDynamicCast(OSData, obj);
 			if (data && data->getLength() == sizeof(T)) {
@@ -49,24 +49,24 @@ namespace WIOKit {
 		}
 		return false;
 	}
-	
+
 	/**
 	 *  Read typed OSData from IORegistryEntry
 	 *
 	 *  @see getOSDataValue
 	 */
 	template <typename T>
-	bool getOSDataValue(const IORegistryEntry *sect, const char *name, T &value) {
+	inline bool getOSDataValue(const IORegistryEntry *sect, const char *name, T &value) {
 		return getOSDataValue(sect->getProperty(name), name, value);
 	}
-	
+
 	/**
 	 *  Read typed OSData from IORegistryEntry
 	 *
 	 *  @see getOSDataValue
 	 */
 	template <typename T>
-	bool getOSDataValue(const OSDictionary *dict, const char *name, T &value) {
+	inline bool getOSDataValue(const OSDictionary *dict, const char *name, T &value) {
 		return getOSDataValue(dict->getObject(name), name, value);
 	}
 
@@ -79,7 +79,7 @@ namespace WIOKit {
 	 *  @return property object (must be released) or nullptr
 	 */
 	EXPORT OSSerialize *getProperty(IORegistryEntry *entry, const char *property);
-	
+
 	/**
 	 *  Model variants
 	 */
@@ -91,14 +91,120 @@ namespace WIOKit {
 			ComputerAny = ComputerLaptop | ComputerDesktop
 		};
 	};
-	
+
+	/**
+	 *  PCI GPU Vendor identifiers
+	 */
+	struct VendorID {
+		enum : uint16_t {
+			ATIAMD = 0x1002,
+			NVIDIA = 0x10de,
+			Intel = 0x8086
+		};
+	};
+
+	/**
+	 *  PCI class codes
+	 */
+	struct ClassCode {
+		enum : uint32_t {
+			VGAController = 0x30000,
+			DisplayController = 0x38000,
+			PCIBridge = 0x60400,
+			HDADevice = 0x040300,
+			// This does not seem to be documented. It works on Haswell at least.
+			IMEI = 0x78000
+		};
+	};
+
+	/**
+	 *  Definitions of PCI Config Registers
+	 */
+	enum PCIRegister : uint8_t {
+		kIOPCIConfigVendorID                = 0x00,
+		kIOPCIConfigDeviceID                = 0x02,
+		kIOPCIConfigCommand                 = 0x04,
+		kIOPCIConfigStatus                  = 0x06,
+		kIOPCIConfigRevisionID              = 0x08,
+		kIOPCIConfigClassCode               = 0x09,
+		kIOPCIConfigCacheLineSize           = 0x0C,
+		kIOPCIConfigLatencyTimer            = 0x0D,
+		kIOPCIConfigHeaderType              = 0x0E,
+		kIOPCIConfigBIST                    = 0x0F,
+		kIOPCIConfigBaseAddress0            = 0x10,
+		kIOPCIConfigBaseAddress1            = 0x14,
+		kIOPCIConfigBaseAddress2            = 0x18,
+		kIOPCIConfigBaseAddress3            = 0x1C,
+		kIOPCIConfigBaseAddress4            = 0x20,
+		kIOPCIConfigBaseAddress5            = 0x24,
+		kIOPCIConfigCardBusCISPtr           = 0x28,
+		kIOPCIConfigSubSystemVendorID       = 0x2C,
+		kIOPCIConfigSubSystemID             = 0x2E,
+		kIOPCIConfigExpansionROMBase        = 0x30,
+		kIOPCIConfigCapabilitiesPtr         = 0x34,
+		kIOPCIConfigInterruptLine           = 0x3C,
+		kIOPCIConfigInterruptPin            = 0x3D,
+		kIOPCIConfigMinimumGrant            = 0x3E,
+		kIOPCIConfigMaximumLatency          = 0x3F
+	};
+
+	/**
+	 *  Fixed offsets for PCI Config I/O virtual methods
+	 */
+	struct PCIConfigOffset {
+		enum : size_t {
+			ConfigRead32      = 0x10A,
+			ConfigWrite32     = 0x10B,
+			ConfigRead16      = 0x10C,
+			ConfigWrite16     = 0x10D,
+			ConfigRead8       = 0x10E,
+			ConfigWrite8      = 0x10F,
+			GetBusNumber      = 0x11D,
+			GetDeviceNumber   = 0x11E,
+			GetFunctionNumber = 0x11F
+		};
+	};
+
+	/**
+	 *  PCI Config I/O method prototypes
+	 */
+	using t_PCIConfigRead32 = uint32_t (*)(IORegistryEntry *service, uint32_t space, uint8_t offset);
+	using t_PCIConfigRead16 = uint16_t (*)(IORegistryEntry *service, uint32_t space, uint8_t offset);
+	using t_PCIConfigRead8  = uint8_t  (*)(IORegistryEntry *service, uint32_t space, uint8_t offset);
+	using t_PCIConfigWrite32 = void (*)(IORegistryEntry *service, uint32_t space, uint8_t offset, uint32_t data);
+	using t_PCIConfigWrite16 = void (*)(IORegistryEntry *service, uint32_t space, uint8_t offset, uint16_t data);
+	using t_PCIConfigWrite8  = void (*)(IORegistryEntry *service, uint32_t space, uint8_t offset, uint8_t data);
+	using t_PCIGetBusNumber = uint8_t (*)(IORegistryEntry *service);
+	using t_PCIGetDeviceNumber = uint8_t (*)(IORegistryEntry *service);
+	using t_PCIGetFunctionNumber = uint8_t (*)(IORegistryEntry *service);
+
+	/**
+	 *  Read PCI Config register
+	 *
+	 *  @param service  IOPCIDevice-compatible service.
+	 *  @param reg      PCI config register
+	 *  @param space    adress space
+	 *  @param size     read size for reading custom registers
+	 */
+    EXPORT uint32_t readPCIConfigValue(IORegistryEntry *service, uint32_t reg, uint32_t space = 0, uint32_t size = 0);
+
+	/**
+	 *  Retrieve PCI device address
+	 *
+	 *  @param service   IOPCIDevice-compatible service.
+	 *  @param bus       bus address
+	 *  @param device    device address
+	 *  @param function  function address
+	 */
+    EXPORT void getDeviceAddress(IORegistryEntry *service, uint8_t &bus, uint8_t &device, uint8_t &function);
+
 	/**
 	 *  Retrieve the computer type
 	 *
 	 *  @return valid computer type or ComputerAny
 	 */
 	EXPORT int getComputerModel();
-	
+
 	/**
 	 *  Retrieve computer model and/or board-id properties
 	 *
@@ -110,7 +216,7 @@ namespace WIOKit {
 	 *  @return true if relevant properties already are available, otherwise buffers are unchanged
 	 */
 	EXPORT bool getComputerInfo(char *model, size_t modelsz, char *board, size_t boardsz);
-	
+
 	/**
 	 *  Retrieve an ioreg entry by path/prefix
 	 *
@@ -124,7 +230,7 @@ namespace WIOKit {
 	 *  @return entry pointer (must NOT be released) or nullptr (on failure or in proc mode)
 	 */
 	EXPORT IORegistryEntry *findEntryByPrefix(const char *path, const char *prefix, const IORegistryPlane *plane, bool (*proc)(void *, IORegistryEntry *)=nullptr, bool brute=false, void *user=nullptr);
-	
+
 	/**
 	 *  Retrieve an ioreg entry by path/prefix
 	 *
@@ -138,6 +244,24 @@ namespace WIOKit {
 	 *  @return entry pointer (must NOT be released) or nullptr (on failure or in proc mode)
 	 */
 	EXPORT IORegistryEntry *findEntryByPrefix(IORegistryEntry *entry, const char *prefix, const IORegistryPlane *plane, bool (*proc)(void *, IORegistryEntry *)=nullptr, bool brute=false, void *user=nullptr);
+
+	/**
+	 *  Check if we are using prelinked kernel/kexts or not
+	 *
+	 *  @return true when confirmed that we definitely are
+	 */
+	EXPORT bool usingPrelinkedCache();
+
+	/**
+	 *  Properly rename the device
+	 *
+	 *  @param  entry   device to rename
+	 *  @param  name    new name
+	 *  @param  compat  correct compatible
+	 *
+	 *  @return true on success
+	 */
+    EXPORT bool renameDevice(IORegistryEntry *entry, const char *name, bool compat=true);
 }
 
 #endif /* kern_iokit_hpp */

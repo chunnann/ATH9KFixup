@@ -17,17 +17,34 @@ bool ADDPR(startSuccess) = true;
 #endif
 
 bool ADDPR(debugEnabled) = false;
+uint32_t ADDPR(debugPrintDelay) = 0;
 
 #ifndef LILU_CUSTOM_IOKIT_INIT
 
+static const char kextVersion[] {
+#ifdef DEBUG
+	'D', 'B', 'G', '-',
+#else
+	'R', 'E', 'L', '-',
+#endif
+	xStringify(MODULE_VERSION)[0], xStringify(MODULE_VERSION)[2], xStringify(MODULE_VERSION)[4], '-',
+	getBuildYear<0>(), getBuildYear<1>(), getBuildYear<2>(), getBuildYear<3>(), '-',
+	getBuildMonth<0>(), getBuildMonth<1>(), '-', getBuildDay<0>(), getBuildDay<1>(), '\0'
+};
+
 OSDefineMetaClassAndStructors(PRODUCT_NAME, IOService)
 
+PRODUCT_NAME *ADDPR(selfInstance) = nullptr;
+
 IOService *PRODUCT_NAME::probe(IOService *provider, SInt32 *score) {
+	ADDPR(selfInstance) = this;
+	setProperty("VersionInfo", kextVersion);
 	auto service = IOService::probe(provider, score);
 	return ADDPR(startSuccess) ? service : nullptr;
 }
 
 bool PRODUCT_NAME::start(IOService *provider) {
+	ADDPR(selfInstance) = this;
 	if (!IOService::start(provider)) {
 		SYSLOG("init", "failed to start the parent");
 		return false;
@@ -37,6 +54,7 @@ bool PRODUCT_NAME::start(IOService *provider) {
 }
 
 void PRODUCT_NAME::stop(IOService *provider) {
+	ADDPR(selfInstance) = nullptr;
 	IOService::stop(provider);
 }
 
@@ -45,7 +63,10 @@ void PRODUCT_NAME::stop(IOService *provider) {
 #ifndef LILU_CUSTOM_KMOD_INIT
 
 EXPORT extern "C" kern_return_t ADDPR(kern_start)(kmod_info_t *, void *) {
-	LiluAPI::Error error = lilu.requestAccess();
+	// This is an ugly hack necessary on some systems where buffering kills most of debug output.
+	PE_parse_boot_argn("liludelay", &ADDPR(debugPrintDelay), sizeof(ADDPR(debugPrintDelay)));
+
+	auto error = lilu.requestAccess();
 	if (error == LiluAPI::Error::NoError) {
 		error = lilu.shouldLoad(ADDPR(config).product, ADDPR(config).version, ADDPR(config).runmode, ADDPR(config).disableArg, ADDPR(config).disableArgNum,
 								ADDPR(config).debugArg, ADDPR(config).debugArgNum, ADDPR(config).betaArg, ADDPR(config).betaArgNum, ADDPR(config).minKernel,
