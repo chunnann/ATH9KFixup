@@ -41,7 +41,8 @@ public:
 		PointerRange,
 		AlreadyDone,
 		LockError,
-		Unsupported
+		Unsupported,
+		InvalidSymbolFound
 	};
 	
 	/**
@@ -88,8 +89,8 @@ public:
 			FSFallback,  // perform fs fallback if kextcache failed
 			Reserved,
 			SysFlagNum,
-			UserFlagNum = sizeof(size_t)-SysFlagNum
 		};
+		static constexpr size_t UserFlagNum {sizeof(size_t)-SysFlagNum};
 		static_assert(UserFlagNum > 0, "There should be at least one user flag");
 		const char *id {nullptr};
 		const char **paths {nullptr};
@@ -97,6 +98,14 @@ public:
 		bool sys[SysFlagNum] {};
 		bool user[UserFlagNum] {};
 		size_t loadIndex {Unloaded}; // Updated after loading
+
+		/**
+		 *  Disable this info from being used
+		 *  May be called from onPatcherLoad callbacks to disable certain kexts
+		 */
+		void switchOff() {
+			sys[KernelPatcher::KextInfo::Disabled] = true;
+		}
 	};
 
 	static_assert(sizeof(KextInfo) == 5 * sizeof(size_t), "KextInfo is no longer ABI compatible");
@@ -166,7 +175,36 @@ public:
 	 *  @return running symbol address or 0
 	 */
 	EXPORT mach_vm_address_t solveSymbol(size_t id, const char *symbol);
-	
+
+	/**
+	 *  Solve a kinfo symbol in range with designated type
+	 *
+	 *  @param id      loaded kinfo id
+	 *  @param symbol  symbol to solve
+	 *  @param start   start address range
+	 *  @param size    address range size
+	 *  @param crash   kernel panic on invalid non-zero address
+	 *
+	 *  @return running symbol address or 0 casted to type T (mach_vm_address_t)
+	 */
+	template <typename T = mach_vm_address_t>
+	inline T solveSymbol(size_t id, const char *symbol, mach_vm_address_t start, size_t size, bool crash=false) {
+		auto addr = solveSymbol(id, symbol);
+		if (addr) {
+			if (addr >= start && addr < start + size)
+				return (T)addr;
+
+			code = Error::InvalidSymbolFound;
+			SYSTRACE("patcher", "address " PRIKADDR " is out of range " PRIKADDR " with size %lX",
+				CASTKADDR(addr), CASTKADDR(start), size);
+
+			PANIC_COND(crash, "patcher", "address " PRIKADDR " is out of range " PRIKADDR " with size %lX",
+				CASTKADDR(addr), CASTKADDR(start), size);
+		}
+
+		return (T)nullptr;
+	}
+
 	/**
 	 *  Hook kext loading and unloading to access kexts at early stage
 	 */
@@ -239,6 +277,15 @@ public:
 	 *  @param patch patch to apply
 	 */
 	EXPORT void applyLookupPatch(const LookupPatch *patch);
+
+	/**
+	 *  Apply a find/replace patch with additional constraints
+	 *
+	 *  @param patch              patch to apply
+	 *  @param startingAddress    start with this address (or kext/kernel lowest address)
+	 *  @param maxSize            maximum size to look for (or kext/kernel max size)
+	 */
+	EXPORT void applyLookupPatch(const LookupPatch *patch, uint8_t *startingAddress, size_t maxSize);
 #endif /* LILU_KEXTPATCH_SUPPORT */
 
 	/**
@@ -267,6 +314,98 @@ public:
 	 */
 	EXPORT mach_vm_address_t routeBlock(mach_vm_address_t from, const uint8_t *opcodes, size_t opnum, bool buildWrapper=false, bool kernelRoute=true);
 
+	/**
+	 *  Route virtual function to function
+	 *
+	 *  @param obj      OSObject-compatible instance
+	 *  @param off      function offset in a virtual table (arch-neutral, i.e. divided by sizeof(uintptr_t)
+	 *  @param func     function to replace with
+	 *  @param orgFunc  pointer to store the original function
+	 *
+	 *  @return true on success
+	 */
+	template <typename T>
+	static inline bool routeVirtual(void *obj, size_t off, T func, T *orgFunc=nullptr) {
+		// First OSObject (and similar) field is its virtual table.
+		auto vt = obj ? reinterpret_cast<T **>(obj)[0] : nullptr;
+		if (vt) {
+			// Do not try to replace twice!
+			if (vt[off] == func)
+				return false;
+			if (orgFunc) *orgFunc = vt[off];
+			vt[off] = func;
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 *  Route request to simplify casting and error handling
+	 *  See routeMultiple.
+	 *
+	 *  symbol  symbol to lookup
+	 *  from    solved symbol (assigned by routeMultiple)
+	 *  to      destination address
+	 *  org     trampoline storage to the original symbol
+	 */
+	struct RouteRequest {
+		const char *symbol {nullptr};
+		mach_vm_address_t from {0};
+		const mach_vm_address_t to {0};
+		mach_vm_address_t *org {nullptr};
+
+		/**
+		 *  Construct RouteRequest for wrapping a function
+		 *  @param s  symbol to lookup
+		 *  @param t  destination address
+		 *  @param o  trampoline storage to the original symbol
+		 */
+		template <typename T>
+		RouteRequest(const char *s, T t, mach_vm_address_t &o) :
+			symbol(s), to(reinterpret_cast<mach_vm_address_t>(t)), org(&o) { }
+
+		/**
+		 *  Construct RouteRequest for routing a function
+		 *  @param s  symbol to lookup
+		 *  @param t  destination address
+		 */
+		template <typename T>
+		RouteRequest(const char *s, T t) :
+			symbol(s), to(reinterpret_cast<mach_vm_address_t>(t)) { }
+	};
+
+	/**
+	 *  Simple route multiple functions with basic error handling
+	 *
+	 *  @param id           kernel item identifier
+	 *  @param requests     an array of requests to replace
+	 *  @param num          requests array size
+	 *  @param start        start address range
+	 *  @param size         address range size
+	 *  @param kernelRoute  kernel change requiring memory protection changes and patch reverting at unload
+	 *  @param force        continue on first error
+	 *
+	 *  @return false if it at least one error happened
+	 */
+	EXPORT bool routeMultiple(size_t id, RouteRequest *requests, size_t num, mach_vm_address_t start=0, size_t size=0, bool kernelRoute=true, bool force=false);
+
+	/**
+	 *  Simple route multiple functions with basic error handling
+	 *
+	 *  @param id           kernel item identifier
+	 *  @param requests     an array of requests to replace
+	 *  @param start        start address range
+	 *  @param size         address range size
+	 *  @param kernelRoute  kernel change requiring memory protection changes and patch reverting at unload
+	 *  @param force        continue on first error
+	 *
+	 *  @return false if it at least one error happened
+	 */
+	template <size_t N>
+	inline bool routeMultiple(size_t id, RouteRequest (&requests)[N], mach_vm_address_t start=0, size_t size=0, bool kernelRoute=true, bool force=false) {
+		return routeMultiple(id, requests, N, start, size, kernelRoute, force);
+	}
+
 private:
 
 	/**
@@ -282,7 +421,7 @@ private:
 	/**
 	 *  Offset to tempExecutableMemory that is safe to use
 	 */
-	off_t tempExecutableMemoryOff {0};
+	size_t tempExecutableMemoryOff {0};
 	
 	/**
 	 *  Patcher status
@@ -328,9 +467,9 @@ private:
 #endif /* LILU_KEXTPATCH_SUPPORT */
 	
 	/**
-	 *  Local disassmebler instance, initialised on demand
+	 *  Kernel prelink image in case prelink is used
 	 */
-	Disassembler disasm;
+	MachInfo *prelinkInfo {nullptr};
 
 	/**
 	 *  Loaded kernel items
@@ -370,31 +509,28 @@ private:
 	 *  Jump instruction sizes
 	 */
 	static constexpr size_t SmallJump {1 + sizeof(int32_t)};
-	static constexpr size_t LongJump {2 * sizeof(uint64_t)};
+	static constexpr size_t LongJump {6 + sizeof(uint64_t)};
 	
 	/**
 	 *  Possible kernel paths
 	 */
 #ifdef LILU_COMPRESSION_SUPPORT
-	static constexpr size_t kernelPathsNum {10};
-#else
-	static constexpr size_t kernelPathsNum {4};
-#endif /* LILU_COMPRESSION_SUPPORT */
-	const char *kernelPaths[kernelPathsNum] {
-#ifdef LILU_COMPRESSION_SUPPORT
+	const char *prelinkKernelPaths[6] {
+		// This is the usual kernel cache place, which often the best thing to use
 		"/System/Library/Caches/com.apple.kext.caches/Startup/kernelcache",
-		"/System/Library/PrelinkedKernels/prelinkedkernel",
-#endif /* LILU_COMPRESSION_SUPPORT */
+		// Otherwise fallback to one of the prelinked kernels
+		// Since we always verify the LC_UUID value, trying the kernels could be done in any order.
+		"/System/Library/PrelinkedKernels/prelinkedkernel", // normal
+		"/macOS Install Data/Locked Files/Boot Files/prelinkedkernel", // 10.13 installer
+		"/com.apple.boot.R/prelinkedkernel", // 10.12+ fusion drive installer
+		"/com.apple.boot.S/System/Library/PrelinkedKernels/prelinkedkernel", // 10.11 fusion drive installer
+		"/com.apple.recovery.boot/prelinkedkernel" // recovery
+	};
+#endif
+
+	const char *kernelPaths[2] {
 		"/System/Library/Kernels/kernel",	//since 10.10
-		"/mach_kernel",
-#ifdef LILU_COMPRESSION_SUPPORT
-		"/System/Library/Caches/com.apple.kext.caches/Startup/kernelcache.debug",
-		"/System/Library/Caches/com.apple.kext.caches/Startup/kernelcache.development",
-		"/System/Library/PrelinkedKernels/prelinkedkernel.debug",
-		"/System/Library/PrelinkedKernels/prelinkedkernel.development",
-#endif /* LILU_COMPRESSION_SUPPORT */
-		"/System/Library/Kernels/kernel.debug",
-		"/System/Library/Kernels/kernel.development"
+		"/mach_kernel"
 	};
 };
 

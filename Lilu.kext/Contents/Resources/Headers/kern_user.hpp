@@ -130,9 +130,14 @@ public:
 			MatchMask   = MatchExact | MatchAny | MatchPrefix | MatchSuffix
 		};
 
-		const char *path;
-		uint32_t len;
-		uint32_t section;
+		/**
+		 *  Unused (aka disabled) proc info section
+		 */
+		static constexpr uint32_t SectionDisabled {0};
+
+		const char *path {nullptr};
+		uint32_t len {0};
+		uint32_t section {SectionDisabled};
 		uint32_t flags {MatchExact};
 	};
 	
@@ -158,7 +163,51 @@ public:
 	 *  @param user     pointer that will be passed to the callback function
 	 */
 	bool registerPatches(ProcInfo **procs, size_t procNum, BinaryModInfo **mods, size_t modNum, t_BinaryLoaded callback, void *user);
-	
+
+	/**
+	 *  Reads current process header
+	 *
+	 *  @param map     vm map
+	 *  @param header  Mach-O header
+	 *
+	 *  @return false on failure
+	 */
+	EXPORT bool getTaskHeader(vm_map_t map, mach_header_64 &header);
+
+	/**
+	 *  Disables dyld_shared_cache for the current process
+	 *
+	 *  @param map  vm map
+	 *
+	 *  @return false on mach image failure
+	 */
+	EXPORT bool injectRestrict(vm_map_t map);
+
+	/**
+	 *  Injects payload into the process right after the header with EP replacement.
+	 *
+	 *  @param map      vm map
+	 *  @param payload  code
+	 *  @param size     code size (up to PAGE_SIZE)
+	 *  @param ep       original entrypoint (may be written to code before copying)
+	 *
+	 *  @return false on mach image failure
+	 */
+	EXPORT bool injectPayload(vm_map_t map, uint8_t *payload, size_t size, void *ep=nullptr);
+
+	/**
+	 *  Allocates a new segment in the process.
+	 *
+	 *  @param map      vm map
+	 *  @param addr     allocation address (e.g. a little below SHARED_REGION_BASE_X86_64)
+	 *  @param payload  code
+	 *  @param size     code size (must be PAGE_SIZE-aligned)
+	 *  @param prot     segment protection
+	 *
+	 *  @return allocated address or 0 on failure
+	 */
+	EXPORT vm_address_t injectSegment(vm_map_t taskPort, vm_address_t addr, uint8_t *payload, size_t size, vm_prot_t prot);
+
 	/**
 	 *  Activates monitoring functions if necessary
 	 */
@@ -175,6 +224,7 @@ private:
 	using t_codeSignValidateRangeWrapper = boolean_t (*)(void *, memory_object_t, memory_object_offset_t, const void *, memory_object_size_t, unsigned *);
 	using t_vmSharedRegionMapFile = kern_return_t (*)(vm_shared_region_t, unsigned int, shared_file_mapping_np *, memory_object_control_t, memory_object_size_t, void *, uint32_t, user_addr_t slide_start, user_addr_t);
 	using t_vmSharedRegionSlide = int (*)(uint32_t, mach_vm_offset_t, mach_vm_size_t, mach_vm_offset_t, mach_vm_size_t, memory_object_control_t);
+	using t_vmSharedRegionSlideMojave = int (*)(uint32_t, mach_vm_offset_t, mach_vm_size_t, mach_vm_offset_t, mach_vm_size_t, mach_vm_offset_t, memory_object_control_t);
 	using t_currentMap = vm_map_t (*)(void);
 	using t_getTaskMap = vm_map_t (*)(task_t);
 	using t_getMapMin = vm_map_offset_t (*)(vm_map_t);
@@ -190,6 +240,7 @@ private:
 	t_codeSignValidateRangeWrapper orgCodeSignValidateRangeWrapper {nullptr};
 	t_vmSharedRegionMapFile orgVmSharedRegionMapFile {nullptr};
 	t_vmSharedRegionSlide orgVmSharedRegionSlide {nullptr};
+	t_vmSharedRegionSlideMojave orgVmSharedRegionSlideMojave {nullptr};
 	t_currentMap orgCurrentMap {nullptr};
 	t_getMapMin orgGetMapMin {nullptr};
 	t_getTaskMap orgGetTaskMap {nullptr};
@@ -208,6 +259,7 @@ private:
 	static kern_return_t vmSharedRegionMapFile(vm_shared_region_t shared_region, unsigned int mappings_count, shared_file_mapping_np *mappings, memory_object_control_t file_control, memory_object_size_t file_size, void *root_dir, uint32_t slide, user_addr_t slide_start, user_addr_t slide_size);
 	static void execsigs(proc_t p, thread_t thread);
 	static int vmSharedRegionSlide(uint32_t slide, mach_vm_offset_t entry_start_address, mach_vm_size_t entry_size, mach_vm_offset_t slide_start, mach_vm_size_t slide_size, memory_object_control_t sr_file_control);
+	static int vmSharedRegionSlideMojave(uint32_t slide, mach_vm_offset_t entry_start_address, mach_vm_size_t entry_size, mach_vm_offset_t slide_start, mach_vm_size_t slide_size, mach_vm_offset_t slid_mapping, memory_object_control_t sr_file_control);
 	static proc_t procExecSwitchTask(proc_t p, task_t current_task, task_t new_task, thread_t new_thread);
 
 	/**
@@ -305,7 +357,7 @@ private:
 	/**
 	 *  Provided global callback for on proc invocation
 	 */
-	ppair<t_BinaryLoaded, void *> userCallback;
+	ppair<t_BinaryLoaded, void *> userCallback {};
 	
 	/**
 	 *  Applies dyld shared cache patches
@@ -363,7 +415,7 @@ private:
 	};
 
 	struct Lookup {
-		uint32_t offs[4];
+		uint32_t offs[4] {};
 		static constexpr size_t matchNum {4};
 		evector<uint64_t> c[matchNum];
 	};
@@ -379,7 +431,7 @@ private:
 		sizeof(segment_command_64),
 		"__RESTRICT",
 		SHARED_REGION_BASE_X86_64,
-		1
+		1, 0, 0, 0, 0, 0, 0
 	};
 	
 	/**
@@ -390,14 +442,14 @@ private:
 		sizeof(segment_command),
 		"__RESTRICT",
 		SHARED_REGION_BASE_I386,
-		1
+		1, 0, 0, 0, 0, 0, 0
 	};
 	
 	/**
-	 *  Temporary header for reading data
+	 *  Temporary buffer for reading image data
 	 */
-	mach_header_64 tmpHeader;
-	
+	uint8_t tmpBufferData[PAGE_SIZE*3] {};
+
 	/**
 	 *  Kernel auth listener handle
 	 */
@@ -411,7 +463,7 @@ private:
 	/**
 	 *  Validation cookie
 	 */
-	void *cookie = {reinterpret_cast<void *>(0xB16B00B5)};
+	void *cookie {nullptr};
 	
 	/**
 	 *  Exec callback
@@ -463,16 +515,7 @@ private:
 	 *  @return true on success
 	 */
 	bool hookMemoryAccess();
-	
-	/**
-	 *  Disables dyld_shared_cache for the current process
-	 *
-	 *  @param map  vm map
-	 *
-	 *  @return false on mach image failure
-	 */
-	bool injectRestrict(vm_map_t map);
-	
+
 	/**
 	 *  Peforms the actual binary patching
 	 *
@@ -483,13 +526,14 @@ private:
 	void patchBinary(vm_map_t map, const char *path, uint32_t len);
 	
 	/**
-	 *  Possible dyld shared cache map paths
+	 *  Dyld shared cache map path for 10.10+ on Haswell
 	 */
-	static constexpr size_t sharedCacheMapPathsNum {2};
-	const char *sharedCacheMap[sharedCacheMapPathsNum] {
-		"/private/var/db/dyld/dyld_shared_cache_x86_64h.map",	//since 10.10
-		"/private/var/db/dyld/dyld_shared_cache_x86_64.map"
-	};
+	static constexpr const char *SharedCacheMapHaswell {"/private/var/db/dyld/dyld_shared_cache_x86_64h.map"};
+
+	/**
+	 *  Dyld shared cache map path for all other systems and older CPUs
+	 */
+	static constexpr const char *SharedCacheMapLegacy {"/private/var/db/dyld/dyld_shared_cache_x86_64.map"};
 
 };
 

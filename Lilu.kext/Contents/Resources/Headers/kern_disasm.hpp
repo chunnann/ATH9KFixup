@@ -22,6 +22,7 @@
 #include <mach/vm_types.h>
 
 class Disassembler {
+#ifdef LILU_ADVANCED_DISASSEMBLY
 	/**
 	 *  Because captsone handle can be 0
 	 */
@@ -30,7 +31,8 @@ class Disassembler {
 	/**
 	 *  Internal capstone handle
 	 */
-	size_t handle;
+	size_t handle {};
+#endif
 
 	/**
 	 *  Max instruction size
@@ -38,27 +40,10 @@ class Disassembler {
 	static constexpr size_t MaxInstruction {15};
 public:
 
-#ifdef LILU_ADVANCED_DISASSEMBLY
-	
-	/**
-	 *  Initialise dissassembling framework
-	 *
-	 *  @param detailed  debugging output necessity
-	 *
-	 *  @return true on success
-	 */
-	EXPORT bool init(bool detailed=false);
-	
-	/**
-	 *  Deinitialise dissassembling framework, must be called regardless of the init error
-	 */
-	EXPORT void deinit();
-
-#endif /* LILU_ADVANCED_DISASSEMBLY */
-	
 	/**
 	 *  Return the real instruction size contained within min bytes
 	 *  Unlike instructionSize this uses HDE engine and at the cost of reduced compatibility it is much faster
+	 *  Note: instruction pointer should point to at least min + 32 valid bytes.
 	 *
 	 *  @param ptr instruction pointer
 	 *  @param min minimal possible size
@@ -69,6 +54,20 @@ public:
 
 #ifdef LILU_ADVANCED_DISASSEMBLY
 	
+	/**
+	 *  Initialise advanced dissassembling framework
+	 *
+	 *  @param detailed  debugging output necessity
+	 *
+	 *  @return true on success
+	 */
+	EXPORT bool init(bool detailed=false);
+	
+	/**
+	 *  Deinitialise advanced dissassembling framework, must be called regardless of the init error
+	 */
+	EXPORT void deinit();
+
 	/**
 	 *  Reads size bytes from addr and disassembles them.
 	 *
