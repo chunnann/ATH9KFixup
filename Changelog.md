@@ -1,5 +1,9 @@
 ATH9KFixup Changelog
 ====================
+#### v1.2.6
+- Added Lilu 1.2.6 compatibility
+- Added macOS Mojave support (untested)
+- Updated injector kext to be in sync with plugin version.
 
 #### v1.2.0
 - Added Lilu 1.2.0 compatibility
