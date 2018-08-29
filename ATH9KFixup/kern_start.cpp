@@ -37,7 +37,7 @@ PluginConfiguration ADDPR(config) {
 	bootargBeta,
 	arrsize(bootargBeta),
 	KernelVersion::Mavericks,
-	KernelVersion::HighSierra,
+	KernelVersion::Mojave,
 	[]() {
 		ath9k.init();
 	}
