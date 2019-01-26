@@ -1,6 +1,10 @@
 ATH9KFixup Changelog
 ====================
 
+#### v1.3.0
+- Added Mojave compatibility
+- Lilu.kext updated to 1.3.0
+
 #### v1.2.0
 - Lilu.kext updated to 1.2.0
 

@@ -41,34 +41,13 @@ class MachInfo {
 	bool kaslr_slide_set {false};            // kaslr can be null, used for disambiguation
 	bool allow_decompress {true};            // allows mach decompression
 	bool prelink_slid {false};               // assume kaslr-slid kext addresses
+	uint64_t self_uuid[2] {};                // saved uuid of the loaded kext or kernel
 
 	/**
-	 *  16 byte IDT descriptor, used for 32 and 64 bits kernels (64 bit capable cpus!)
+	 *  Kernel slide is aligned by 20 bits
 	 */
-	struct descriptor_idt {
-		uint16_t offset_low;
-		uint16_t seg_selector;
-		uint8_t reserved;
-		uint8_t flag;
-		uint16_t offset_middle;
-		uint32_t offset_high;
-		uint32_t reserved2;
-	};
-	
-	/**
-	 *  Retrieve the address of the IDT
-	 *
-	 *  @return always returns the IDT address
-	 */
-	mach_vm_address_t getIDTAddress();
-	
-	/**
-	 *  Calculate the address of the kernel int80 handler
-	 *
-	 *  @return always returns the int80 handler address
-	 */
-	mach_vm_address_t calculateInt80Address();
-	
+	static constexpr size_t KASLRAlignment {0x100000};
+
 	/**
 	 *  Retrieve LC_UUID command value from a mach header
 	 *
@@ -77,6 +56,15 @@ class MachInfo {
 	 *  @return UUID or nullptr
 	 */
 	uint64_t *getUUID(void *header);
+
+	/**
+	 *  Retrieve and preserve LC_UUID command value from a mach header
+	 *
+	 *  @param header mach header pointer
+	 *
+	 *  @return true on success
+	 */
+	bool loadUUID(void *header);
 	
 	/**
 	 *  Enable/disable the Write Protection bit in CR0 register
@@ -140,7 +128,26 @@ class MachInfo {
 	}
 	MachInfo(const MachInfo &) = delete;
 	MachInfo &operator =(const MachInfo &) = delete;
-	
+
+	/**
+	 *  Resolve mach data in the kernel via prelinked cache
+	 *
+	 *  @param prelink    prelink information source (i.e. Kernel MachInfo)
+	 *
+	 *  @return KERN_SUCCESS if loaded
+	 */
+	kern_return_t initFromPrelinked(MachInfo *prelink);
+
+	/**
+	 *  Resolve mach data in the kernel via filesystem access
+	 *
+	 *  @param paths      filesystem paths for lookup
+	 *  @param num        the number of paths passed
+	 *
+	 *  @return KERN_SUCCESS if loaded
+	 */
+	kern_return_t initFromFileSystem(const char * const paths[], size_t num);
+
 public:
 
 	/**
@@ -187,7 +194,7 @@ public:
 	EXPORT void deinit();
 
 	/**
-	 *  retrieve the mach header and __TEXT addresses
+	 *  Retrieve the mach header and __TEXT addresses
 	 *
 	 *  @param slide load slide if calculating for kexts
 	 *  @param size  memory size
@@ -208,7 +215,7 @@ public:
 	EXPORT kern_return_t setRunningAddresses(mach_vm_address_t slide=0, size_t size=0);
 
 	/**
-	 *  retrieve running mach positions
+	 *  Retrieve running mach positions
 	 *
 	 *  @param header pointer to header
 	 *  @param size   file size
@@ -216,7 +223,7 @@ public:
 	EXPORT void getRunningPosition(uint8_t * &header, size_t &size);
 
 	/**
-	 *  solve a mach symbol (running addresses must be calculated)
+	 *  Solve a mach symbol (running addresses must be calculated)
 	 *
 	 *  @param symbol symbol to solve
 	 *
@@ -225,15 +232,23 @@ public:
 	EXPORT mach_vm_address_t solveSymbol(const char *symbol);
 
 	/**
-	 *  find the kernel base address (mach-o header)
-	 *  by searching backwards using the int80 handler as starting point
+	 *  Find the kernel base address (mach-o header)
 	 *
 	 *  @return kernel base address or 0
 	 */
 	EXPORT mach_vm_address_t findKernelBase();
 
 	/**
-	 *  enable/disable interrupt handling
+	 *  Compare the loaded kernel with the current UUID (see loadUUID)
+	 *
+	 *  @param base  image base, pass 0 to use kernel base
+	 *
+	 *  @return true if image uuids match
+	 */
+	EXPORT bool isCurrentBinary(mach_vm_address_t base=0);
+
+	/**
+	 *  Enable/disable interrupt handling
 	 *  this is similar to ml_set_interrupts_enabled except the return value
 	 *
 	 *  @param enable the desired value
@@ -243,7 +258,7 @@ public:
 	EXPORT static bool setInterrupts(bool enable);
 	
 	/**
-	 *  enable/disable kernel memory write protection
+	 *  Enable/disable kernel memory write protection
 	 *
 	 *  @param enable  the desired value
 	 *  @param lock    use spinlock to disable cpu preemption (see KernelPatcher::kernelWriteLock)
@@ -253,27 +268,19 @@ public:
 	EXPORT static kern_return_t setKernelWriting(bool enable, IOSimpleLock *lock);
 	
 	/**
-	 *  Compare the loaded kernel with the passed kernel header
-	 *
-	 *  @param kernel_header 64-bit mach header of at least HeaderSize size
-	 *
-	 *  @return true if the kernel uuids match
-	 */
-	EXPORT bool isCurrentKernel(void *kernelHeader);
-	
-	/**
 	 *  Find section bounds in a passed binary for provided cpu
 	 *
-	 *  @param ptr         pointer to a complete mach binary
+	 *  @param ptr         pointer to a complete mach-o binary
+	 *  @param sourceSize  size of the mach-o binary
 	 *  @param vmsegment   returned vm segment pointer
 	 *  @param vmsection   returned vm section pointer
 	 *  @param sectionptr  returned section pointer
-	 *  @param size        returned section size or 0 on failure
+	 *  @param sectionSize returned section size or 0 on failure
 	 *  @param segmentName segment name
 	 *  @param sectionName section name
 	 *  @param cpu         cpu to look for in case of fat binaries
 	 */
-	EXPORT static void findSectionBounds(void *ptr, vm_address_t &vmsegment, vm_address_t &vmsection, void *&sectionptr, size_t &size, const char *segmentName="__TEXT", const char *sectionName="__text", cpu_type_t cpu=CPU_TYPE_X86_64);
+	EXPORT static void findSectionBounds(void *ptr, size_t sourceSize, vm_address_t &vmsegment, vm_address_t &vmsection, void *&sectionptr, size_t &sectionSize, const char *segmentName="__TEXT", const char *sectionName="__text", cpu_type_t cpu=CPU_TYPE_X86_64);
 
 	/**
 	 *  Request to free file buffer resources (not including linkedit symtable)

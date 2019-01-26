@@ -135,12 +135,12 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         progressState |= ProcessingState::AirPortAtheros40Patched;
                         DBGLOG("ath9k", "patched ___ath_attach");
                     }
-                    else if (getKernelVersion() == KernelVersion::HighSierra){
+                    else if (getKernelVersion() >= KernelVersion::HighSierra){
                         const uint8_t find1[]    = {0x66, 0x89, 0x83, 0x38, 0x04, 0x00, 0x00};
                         const uint8_t replace1[] = {0xC6, 0x83, 0x38, 0x04, 0x00, 0x00, 0x30};
                         KextPatch kext_patch1 {
                             {&kextList[i], find1, replace1, sizeof(find1), 1},
-                            KernelVersion::HighSierra, KernelVersion::HighSierra
+                            KernelVersion::HighSierra, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch1, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -150,7 +150,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace2[] = {0x41, 0x0F, 0xB7, 0xFD, 0x83, 0xFF, 0x00};
                         KextPatch kext_patch2 {
                             {&kextList[i], find2, replace2, sizeof(find2), 1},
-                            KernelVersion::HighSierra, KernelVersion::HighSierra
+                            KernelVersion::HighSierra, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch2, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -161,7 +161,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                     const uint8_t replace3[] = {0xC1, 0xE9, 0x0C, 0x90, 0xB9, 0xC0, 0x01, 0x00, 0x00};
                     KextPatch kext_patch3 {
                         {&kextList[i], find3, replace3, sizeof(find3), 4},
-                        KernelVersion::Mavericks, KernelVersion::HighSierra
+                        KernelVersion::Mavericks, KernelVersion::Mojave
                     };
                     applyPatches(patcher, index, &kext_patch3, 1);
                     progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -181,7 +181,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                     const uint8_t replace5[] = {0x90, 0xB9, 0x02, 0x00, 0x00, 0x00};
                     KextPatch kext_patch5 {
                         {&kextList[i], find5, replace5, sizeof(find5), 5},
-                        KernelVersion::Mavericks, KernelVersion::HighSierra
+                        KernelVersion::Mavericks, KernelVersion::Mojave
                     };
                     applyPatches(patcher, index, &kext_patch5, 1);
                     progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -191,7 +191,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                     const uint8_t replace6[] = {0x90, 0xB8, 0x02, 0x00, 0x00, 0x00};
                     KextPatch kext_patch6 {
                         {&kextList[i], find6, replace6, sizeof(find6), 3},
-                        KernelVersion::Mavericks, KernelVersion::HighSierra
+                        KernelVersion::Mavericks, KernelVersion::Mojave
                     };
                     applyPatches(patcher, index, &kext_patch6, 1);
                     progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -201,7 +201,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                     const uint8_t replace7[] = {0x0F, 0xB6, 0x87, 0x00, 0xB2, 0x00, 0x00, 0x90, 0x31, 0xC0};
                     KextPatch kext_patch7 {
                         {&kextList[i], find7, replace7, sizeof(find7), 1},
-                        KernelVersion::Mavericks, KernelVersion::HighSierra
+                        KernelVersion::Mavericks, KernelVersion::Mojave
                     };
                     applyPatches(patcher, index, &kext_patch7, 1);
                     progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -211,7 +211,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                     const uint8_t replace8[] = {0x0F, 0xB6, 0x87, 0x00, 0xB2, 0x00, 0x00, 0x90, 0x31, 0xC0};
                     KextPatch kext_patch8 {
                         {&kextList[i], find8, replace8, sizeof(find8), 1},
-                        KernelVersion::Mavericks, KernelVersion::HighSierra
+                        KernelVersion::Mavericks, KernelVersion::Mojave
                     };
                     applyPatches(patcher, index, &kext_patch8, 1);
                     progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -221,7 +221,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                     const uint8_t replace9[] = {0xC6, 0x83, 0x16, 0x09, 0x00, 0x00, 0x00};
                     KextPatch kext_patch9 {
                         {&kextList[i], find9, replace9, sizeof(find9), 4},
-                        KernelVersion::Mavericks, KernelVersion::HighSierra
+                        KernelVersion::Mavericks, KernelVersion::Mojave
                     };
                     applyPatches(patcher, index, &kext_patch9, 1);
                     progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -231,7 +231,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                     const uint8_t replace10[] = {0x48, 0xB9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x10, 0x00};
                     KextPatch kext_patch10 {
                         {&kextList[i], find10, replace10, sizeof(find10), 1},
-                        KernelVersion::Mavericks, KernelVersion::HighSierra
+                        KernelVersion::Mavericks, KernelVersion::Mojave
                     };
                     applyPatches(patcher, index, &kext_patch10, 1);
                     progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -243,7 +243,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace[] = {0x39, 0x34, 0x38, 0x35};
                         KextPatch kext_patch {
                             {&kextList[i], find, replace, sizeof(find), 2},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -285,7 +285,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                             const uint8_t replace11[] = {0xFF, 0x01, 0x00, 0x00, 0xB9, 0xFF, 0x01, 0x00, 0x00};
                             KextPatch kext_patch11 {
                                 {&kextList[i], find11, replace11, sizeof(find11), 2},
-                                KernelVersion::Yosemite, KernelVersion::HighSierra
+                                KernelVersion::Yosemite, KernelVersion::Mojave
                             };
                             applyPatches(patcher, index, &kext_patch11, 1);
                             progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -295,7 +295,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                             const uint8_t replace12[] = {0xBA, 0x01, 0x00, 0x00, 0x00, 0x4C, 0x89, 0xE7, 0xFF, 0xD0};
                             KextPatch kext_patch12 {
                                 {&kextList[i], find12, replace12, sizeof(find12), 2},
-                                KernelVersion::Yosemite, KernelVersion::HighSierra
+                                KernelVersion::Yosemite, KernelVersion::Mojave
                             };
                             applyPatches(patcher, index, &kext_patch12, 1);
                             progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -305,7 +305,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                             const uint8_t replace13[] = {0xBA, 0x01, 0x00, 0x00, 0x00, 0x4C, 0x89, 0xE7, 0x41, 0xFF, 0x55, 0x00};
                             KextPatch kext_patch13 {
                                 {&kextList[i], find13, replace13, sizeof(find13), 2},
-                                KernelVersion::Yosemite, KernelVersion::HighSierra
+                                KernelVersion::Yosemite, KernelVersion::Mojave
                             };
                             applyPatches(patcher, index, &kext_patch13, 1);
                             progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -316,7 +316,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace12[] = {0xA2, 0x00, 0x00, 0xBA, 0x01, 0x00, 0x00, 0x00};
                         KextPatch kext_patch12 {
                             {&kextList[i], find12, replace12, sizeof(find12), 2},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch12, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -326,7 +326,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace13[] = {0x83, 0x00, 0x00, 0xBA, 0x01, 0x00, 0x00, 0x00};
                         KextPatch kext_patch13 {
                             {&kextList[i], find13, replace13, sizeof(find13), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch13, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -336,7 +336,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace14[] = {0xBE, 0x84, 0x62, 0x01, 0x00};
                         KextPatch kext_patch14 {
                             {&kextList[i], find14, replace14, sizeof(find14), 2},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch14, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -346,7 +346,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace15[] = {0xBE, 0x8C, 0x62, 0x01, 0x00};
                         KextPatch kext_patch15 {
                             {&kextList[i], find15, replace15, sizeof(find15), 4},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch15, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -354,7 +354,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch51 {
                             {&kextList[i], _ar9300_osprey_2p0_mac_core, _ar9485_osprey_2p0_mac_core, sizeof(_ar9300_osprey_2p0_mac_core), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch51, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -362,7 +362,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch52 {
                             {&kextList[i], _ar9300_osprey_2p0_mac_postamble, _ar9485_osprey_2p0_mac_postamble, sizeof(_ar9300_osprey_2p0_mac_postamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch52, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -370,7 +370,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch53 {
                             {&kextList[i], _ar9300_osprey_2p0_baseband_core, _ar9485_osprey_2p0_baseband_core, sizeof(_ar9300_osprey_2p0_baseband_core), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch53, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -378,7 +378,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch54 {
                             {&kextList[i], _ar9300_osprey_2p0_baseband_postamble, _ar9485_osprey_2p0_baseband_postamble, sizeof(_ar9300_osprey_2p0_baseband_postamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch54, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -386,7 +386,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch55 {
                             {&kextList[i], _ar9300_osprey_2p0_radio_core, _ar9485_osprey_2p0_radio_core, sizeof(_ar9300_osprey_2p0_radio_core), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch55, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -394,7 +394,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch56 {
                             {&kextList[i], _ar9300_osprey_2p0_radio_postamble, _ar9485_osprey_2p0_radio_postamble, sizeof(_ar9300_osprey_2p0_radio_postamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch56, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -402,7 +402,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch57 {
                             {&kextList[i], _ar9300_osprey_2p0_soc_preamble, _ar9485_osprey_2p0_soc_preamble, sizeof(_ar9300_osprey_2p0_soc_preamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch57, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -410,7 +410,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch58 {
                             {&kextList[i], _ar9300_osprey_2p0_soc_postamble, _ar9485_osprey_2p0_soc_postamble, sizeof(_ar9300_osprey_2p0_soc_postamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch58, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -418,7 +418,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch59 {
                             {&kextList[i], _ar9300Common_rx_gain_table_osprey_2p0, _ar9485Common_rx_gain_table_osprey_2p0, sizeof(_ar9300Common_rx_gain_table_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch59, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -426,7 +426,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch60 {
                             {&kextList[i], _ar9300Modes_lowest_ob_db_tx_gain_table_osprey_2p0, _ar9485Modes_lowest_ob_db_tx_gain_table_osprey_2p0, sizeof(_ar9300Modes_lowest_ob_db_tx_gain_table_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch60, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -434,7 +434,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch61 {
                             {&kextList[i], _ar9300PciePhy_pll_on_clkreq_disable_L1_osprey_2p0, _ar9485PciePhy_pll_on_clkreq_disable_L1_osprey_2p0, sizeof(_ar9300PciePhy_pll_on_clkreq_disable_L1_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch61, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -442,7 +442,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch62 {
                             {&kextList[i], _ar9300PciePhy_clkreq_enable_L1_osprey_2p0, _ar9485PciePhy_clkreq_enable_L1_osprey_2p0, sizeof(_ar9300PciePhy_clkreq_enable_L1_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch62, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -450,7 +450,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch63 {
                             {&kextList[i], _ar9300Modes_fast_clock_osprey_2p0, _ar9485Modes_fast_clock_osprey_2p0, sizeof(_ar9300Modes_fast_clock_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch63, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -461,7 +461,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace[] = {0x39, 0x35, 0x36, 0x35};
                         KextPatch kext_patch {
                             {&kextList[i], find, replace, sizeof(find), 2},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -471,7 +471,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace11[] = {0x8D, 0x90, 0x00, 0x04, 0x08, 0x00};
                         KextPatch kext_patch11 {
                             {&kextList[i], find11, replace11, sizeof(find11), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch11, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -503,7 +503,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                             const uint8_t replace12[] = {0xBA, 0x01, 0x00, 0x00, 0x00, 0x4C, 0x89, 0xE7, 0xFF, 0xD0};
                             KextPatch kext_patch12 {
                                 {&kextList[i], find12, replace12, sizeof(find12), 2},
-                                KernelVersion::Yosemite, KernelVersion::HighSierra
+                                KernelVersion::Yosemite, KernelVersion::Mojave
                             };
                             applyPatches(patcher, index, &kext_patch12, 1);
                             progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -513,7 +513,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                             const uint8_t replace13[] = {0xBA, 0x01, 0x00, 0x00, 0x00, 0x4C, 0x89, 0xE7, 0x41, 0xFF, 0x55, 0x00};
                             KextPatch kext_patch13 {
                                 {&kextList[i], find13, replace13, sizeof(find13), 2},
-                                KernelVersion::Yosemite, KernelVersion::HighSierra
+                                KernelVersion::Yosemite, KernelVersion::Mojave
                             };
                             applyPatches(patcher, index, &kext_patch13, 1);
                             progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -524,7 +524,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace12[] = {0xA2, 0x00, 0x00, 0xBA, 0x01, 0x00, 0x00, 0x00};
                         KextPatch kext_patch12 {
                             {&kextList[i], find12, replace12, sizeof(find12), 2},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch12, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -534,7 +534,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace13[] = {0x83, 0x00, 0x00, 0xBA, 0x01, 0x00, 0x00, 0x00};
                         KextPatch kext_patch13 {
                             {&kextList[i], find13, replace13, sizeof(find13), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch13, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -544,7 +544,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace14[] = {0xBE, 0x8C, 0x62, 0x01, 0x00};
                         KextPatch kext_patch14 {
                             {&kextList[i], find14, replace14, sizeof(find14), 2},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch14, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -554,7 +554,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace15[] = {0xBE, 0x94, 0x62, 0x01, 0x00};
                         KextPatch kext_patch15 {
                             {&kextList[i], find15, replace15, sizeof(find15), 4},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch15, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -562,7 +562,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch51 {
                             {&kextList[i], _ar9300_osprey_2p0_mac_core, _ar9565_osprey_2p0_mac_core, sizeof(_ar9300_osprey_2p0_mac_core), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch51, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -570,7 +570,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch52 {
                             {&kextList[i], _ar9300_osprey_2p0_mac_postamble, _ar9565_osprey_2p0_mac_postamble, sizeof(_ar9300_osprey_2p0_mac_postamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch52, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -578,7 +578,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch53 {
                             {&kextList[i], _ar9300_osprey_2p0_baseband_core, _ar9565_osprey_2p0_baseband_core, sizeof(_ar9300_osprey_2p0_baseband_core), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch53, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -586,7 +586,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch54 {
                             {&kextList[i], _ar9300_osprey_2p0_baseband_postamble, _ar9565_osprey_2p0_baseband_postamble, sizeof(_ar9300_osprey_2p0_baseband_postamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch54, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -594,7 +594,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch55 {
                             {&kextList[i], _ar9300_osprey_2p0_radio_core, _ar9565_osprey_2p0_radio_core, sizeof(_ar9300_osprey_2p0_radio_core), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch55, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -602,7 +602,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch56 {
                             {&kextList[i], _ar9300_osprey_2p0_radio_postamble, _ar9565_osprey_2p0_radio_postamble, sizeof(_ar9300_osprey_2p0_radio_postamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch56, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -610,7 +610,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch57 {
                             {&kextList[i], _ar9300_osprey_2p0_soc_preamble, _ar9565_osprey_2p0_soc_preamble, sizeof(_ar9300_osprey_2p0_soc_preamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch57, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -618,7 +618,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch58 {
                             {&kextList[i], _ar9300_osprey_2p0_soc_postamble, _ar9565_osprey_2p0_soc_postamble, sizeof(_ar9300_osprey_2p0_soc_postamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch58, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -626,7 +626,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch59 {
                             {&kextList[i], _ar9300Common_rx_gain_table_osprey_2p0, _ar9565Common_rx_gain_table_osprey_2p0, sizeof(_ar9300Common_rx_gain_table_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch59, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -634,7 +634,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch60 {
                             {&kextList[i], _ar9300Modes_lowest_ob_db_tx_gain_table_osprey_2p0, _ar9565Modes_lowest_ob_db_tx_gain_table_osprey_2p0, sizeof(_ar9300Modes_lowest_ob_db_tx_gain_table_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch60, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -642,7 +642,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch61 {
                             {&kextList[i], _ar9300PciePhy_pll_on_clkreq_disable_L1_osprey_2p0, _ar9565PciePhy_pll_on_clkreq_disable_L1_osprey_2p0, sizeof(_ar9300PciePhy_pll_on_clkreq_disable_L1_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch61, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -650,7 +650,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch62 {
                             {&kextList[i], _ar9300PciePhy_clkreq_enable_L1_osprey_2p0, _ar9565PciePhy_clkreq_enable_L1_osprey_2p0, sizeof(_ar9300PciePhy_clkreq_enable_L1_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch62, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -658,7 +658,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch63 {
                             {&kextList[i], _ar9300Modes_fast_clock_osprey_2p0, _ar9565Modes_fast_clock_osprey_2p0, sizeof(_ar9300Modes_fast_clock_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch63, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -669,7 +669,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace[] = {0x39, 0x34, 0x36, 0x58};
                         KextPatch kext_patch {
                             {&kextList[i], find, replace, sizeof(find), 2},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -679,7 +679,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace11[] = {0x8D, 0x90, 0x00, 0x04, 0x08, 0x00};
                         KextPatch kext_patch11 {
                             {&kextList[i], find11, replace11, sizeof(find11), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch11, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -690,7 +690,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                             const uint8_t replace12[] = {0xBA, 0x03, 0x00, 0x00, 0x00, 0xFF, 0xD0};
                             KextPatch kext_patch12 {
                                 {&kextList[i], find12, replace12, sizeof(find12), 2},
-                                KernelVersion::Mavericks, KernelVersion::Mavericks
+                                KernelVersion::Mavericks, KernelVersion::Mojave
                             };
                             applyPatches(patcher, index, &kext_patch12, 1);
                             progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -700,7 +700,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                             const uint8_t replace13[] = {0xBA, 0x03, 0x00, 0x00, 0x00, 0xFF, 0x13};
                             KextPatch kext_patch13 {
                                 {&kextList[i], find13, replace13, sizeof(find13), 2},
-                                KernelVersion::Mavericks, KernelVersion::Mavericks
+                                KernelVersion::Mavericks, KernelVersion::Mojave
                             };
                             applyPatches(patcher, index, &kext_patch13, 1);
                             progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -711,7 +711,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                             const uint8_t replace12[] = {0xBA, 0x03, 0x00, 0x00, 0x00, 0x4C, 0x89, 0xE7, 0xFF, 0xD0};
                             KextPatch kext_patch12 {
                                 {&kextList[i], find12, replace12, sizeof(find12), 2},
-                                KernelVersion::Yosemite, KernelVersion::HighSierra
+                                KernelVersion::Yosemite, KernelVersion::Mojave
                             };
                             applyPatches(patcher, index, &kext_patch12, 1);
                             progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -721,7 +721,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                             const uint8_t replace13[] = {0xBA, 0x03, 0x00, 0x00, 0x00, 0x4C, 0x89, 0xE7, 0x41, 0xFF, 0x55, 0x00};
                             KextPatch kext_patch13 {
                                 {&kextList[i], find13, replace13, sizeof(find13), 2},
-                                KernelVersion::Yosemite, KernelVersion::HighSierra
+                                KernelVersion::Yosemite, KernelVersion::Mojave
                             };
                             applyPatches(patcher, index, &kext_patch13, 1);
                             progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -732,7 +732,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace12[] = {0xA2, 0x00, 0x00, 0xBA, 0x03, 0x00, 0x00, 0x00};
                         KextPatch kext_patch12 {
                             {&kextList[i], find12, replace12, sizeof(find12), 2},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch12, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -742,7 +742,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace13[] = {0x83, 0x00, 0x00, 0xBA, 0x03, 0x00, 0x00, 0x00};
                         KextPatch kext_patch13 {
                             {&kextList[i], find13, replace13, sizeof(find13), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch13, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -752,7 +752,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace14[] = {0xBE, 0x8C, 0x62, 0x01, 0x00};
                         KextPatch kext_patch14 {
                             {&kextList[i], find14, replace14, sizeof(find14), 2},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch14, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -762,7 +762,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
                         const uint8_t replace15[] = {0xBE, 0x94, 0x62, 0x01, 0x00};
                         KextPatch kext_patch15 {
                             {&kextList[i], find15, replace15, sizeof(find15), 4},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch15, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -770,7 +770,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch51 {
                             {&kextList[i], _ar9300_osprey_2p0_mac_core, _ar946x_osprey_2p0_mac_core, sizeof(_ar9300_osprey_2p0_mac_core), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch51, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -778,7 +778,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch52 {
                             {&kextList[i], _ar9300_osprey_2p0_mac_postamble, _ar946x_osprey_2p0_mac_postamble, sizeof(_ar9300_osprey_2p0_mac_postamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch52, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -786,7 +786,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch53 {
                             {&kextList[i], _ar9300_osprey_2p0_baseband_core, _ar946x_osprey_2p0_baseband_core, sizeof(_ar9300_osprey_2p0_baseband_core), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch53, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -794,7 +794,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch54 {
                             {&kextList[i], _ar9300_osprey_2p0_baseband_postamble, _ar946x_osprey_2p0_baseband_postamble, sizeof(_ar9300_osprey_2p0_baseband_postamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch54, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -802,7 +802,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch55 {
                             {&kextList[i], _ar9300_osprey_2p0_radio_core, _ar946x_osprey_2p0_radio_core, sizeof(_ar9300_osprey_2p0_radio_core), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch55, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -810,7 +810,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch56 {
                             {&kextList[i], _ar9300_osprey_2p0_radio_postamble, _ar946x_osprey_2p0_radio_postamble, sizeof(_ar9300_osprey_2p0_radio_postamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch56, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -818,7 +818,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch57 {
                             {&kextList[i], _ar9300_osprey_2p0_soc_preamble, _ar946x_osprey_2p0_soc_preamble, sizeof(_ar9300_osprey_2p0_soc_preamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch57, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -826,7 +826,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch58 {
                             {&kextList[i], _ar9300_osprey_2p0_soc_postamble, _ar946x_osprey_2p0_soc_postamble, sizeof(_ar9300_osprey_2p0_soc_postamble), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch58, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -834,7 +834,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch59 {
                             {&kextList[i], _ar9300Common_rx_gain_table_osprey_2p0, _ar946xCommon_rx_gain_table_osprey_2p0, sizeof(_ar9300Common_rx_gain_table_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch59, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -842,7 +842,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch60 {
                             {&kextList[i], _ar9300Modes_lowest_ob_db_tx_gain_table_osprey_2p0, _ar946xModes_lowest_ob_db_tx_gain_table_osprey_2p0, sizeof(_ar9300Modes_lowest_ob_db_tx_gain_table_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch60, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -850,7 +850,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch61 {
                             {&kextList[i], _ar9300PciePhy_pll_on_clkreq_disable_L1_osprey_2p0, _ar946xPciePhy_pll_on_clkreq_disable_L1_osprey_2p0, sizeof(_ar9300PciePhy_pll_on_clkreq_disable_L1_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch61, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -858,7 +858,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch62 {
                             {&kextList[i], _ar9300PciePhy_clkreq_enable_L1_osprey_2p0, _ar946xPciePhy_clkreq_enable_L1_osprey_2p0, sizeof(_ar9300PciePhy_clkreq_enable_L1_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch62, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
@@ -866,7 +866,7 @@ void ATH9K::processKext(KernelPatcher &patcher, size_t index, mach_vm_address_t 
 
                         KextPatch kext_patch63 {
                             {&kextList[i], _ar9300Modes_fast_clock_osprey_2p0, _ar946xModes_fast_clock_osprey_2p0, sizeof(_ar9300Modes_fast_clock_osprey_2p0), 1},
-                            KernelVersion::Mavericks, KernelVersion::HighSierra
+                            KernelVersion::Mavericks, KernelVersion::Mojave
                         };
                         applyPatches(patcher, index, &kext_patch63, 1);
                         progressState |= ProcessingState::AirPortAtheros40Patched;
