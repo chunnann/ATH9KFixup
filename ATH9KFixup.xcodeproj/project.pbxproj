@@ -361,7 +361,7 @@
 				MODULE_NAME = com.chunnann.ATH9KFixup;
 				MODULE_START = "$(PRODUCT_NAME)_kern_start";
 				MODULE_STOP = "$(PRODUCT_NAME)_kern_stop";
-				MODULE_VERSION = 1.3.0;
+				MODULE_VERSION = 1.3.3;
 				OTHER_CFLAGS = (
 					"-mmmx",
 					"-msse",
@@ -406,7 +406,7 @@
 				MODULE_NAME = com.chunnann.ATH9KFixup;
 				MODULE_START = "$(PRODUCT_NAME)_kern_start";
 				MODULE_STOP = "$(PRODUCT_NAME)_kern_stop";
-				MODULE_VERSION = 1.3.0;
+				MODULE_VERSION = 1.3.3;
 				OTHER_CFLAGS = (
 					"-mmmx",
 					"-msse",
